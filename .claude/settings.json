@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ \"$(git config core.hooksPath)\" = \".githooks\" ] || echo '{\"systemMessage\":\"AVISO: en esta maquina faltan los hooks de git, asi que la version no sube. Se instalan con: git config core.hooksPath .githooks\",\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"En esta maquina core.hooksPath no apunta a .githooks: los commits no suben la version. Mencionalo en una linea al empezar y pregunta si se instala con git config core.hooksPath .githooks.\"}}'"
+            "command": "[ \"$(git config core.hooksPath)\" = \".githooks\" ] || echo '{\"systemMessage\":\"WARNING: git hooks are not active on this machine, so the version does not bump. Enable them with: git config core.hooksPath .githooks\",\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"core.hooksPath does not point to .githooks: commits do not bump the version. Mention it in one line at the start and ask whether to enable it with git config core.hooksPath .githooks.\"}}'"
           }
         ]
       }

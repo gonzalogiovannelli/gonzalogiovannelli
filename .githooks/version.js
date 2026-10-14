@@ -1,13 +1,13 @@
-// La versión del repositorio, que sube sola con cada commit según su prefijo.
+// The repo version, bumped automatically on every commit from its prefix.
 //
-//   feat: algo nuevo (skill, script, área)      → sube el MENOR   1.4.2 → 1.5.0
-//   fix:  ajuste a algo que ya existe           → sube el PARCHE  1.4.2 → 1.4.3
-//   chore: datos puros                          → no sube
-//   feat!: o fix!: cambia cómo se usa el repo   → sube el MAYOR   1.4.2 → 2.0.0
+//   feat: something new (skill, script, area)      → bumps MINOR   1.4.2 → 1.5.0
+//   fix:  adjustment to something that exists     → bumps PATCH   1.4.2 → 1.4.3
+//   chore: pure data                              → no bump
+//   feat!: or fix!: changes how the repo is used  → bumps MAJOR   1.4.2 → 2.0.0
 //
-// La llaman dos hooks: `commit-msg` rechaza un mensaje sin prefijo, y `post-commit`
-// sube VERSION, añade la entrada al CHANGELOG, las mete en el mismo commit con un
-// --amend y pone la etiqueta. Ver tickets/abiertos/versionar-todos-los-repos.md.
+// Called by two hooks: `commit-msg` rejects a message without a prefix, and `post-commit`
+// bumps VERSION, adds the CHANGELOG entry, folds both into the same commit with --amend
+// and tags it. See the Versioning section of README.md.
 
 const fs = require('fs');
 const path = require('path');
@@ -23,14 +23,14 @@ const gitDir = git('rev-parse', '--absolute-git-dir');
 function commitMsg(fichero) {
   const linea = fs.readFileSync(fichero, 'utf8').split('\n')[0];
   if (PREFIJO.test(linea) || LIBRES.test(linea)) return;
-  console.error(`Commit detenido: el mensaje no lleva prefijo de tipo.
+  console.error(`Commit stopped: the message has no type prefix.
 
-  feat: algo nuevo          (sube 1.4.2 → 1.5.0)
-  fix:  ajuste              (sube 1.4.2 → 1.4.3)
-  chore: datos              (no sube)
-  feat!: o fix!: rompe      (sube 1.4.2 → 2.0.0)
+  feat: something new       (bumps 1.4.2 → 1.5.0)
+  fix:  adjustment          (bumps 1.4.2 → 1.4.3)
+  chore: data               (no bump)
+  feat!: or fix!: breaking  (bumps 1.4.2 → 2.0.0)
 
-Mensaje recibido: "${linea}"`);
+Message received: "${linea}"`);
   process.exit(1);
 }
 
@@ -43,7 +43,7 @@ function subir(version, tipo, rompe) {
 
 function postCommit() {
   if (process.env.VERSIONANDO) return;
-  // En un rebase o un cherry-pick el --amend reescribiría commits ajenos al que se está haciendo.
+  // During a rebase or cherry-pick the --amend would rewrite commits other than the one being made.
   if (['rebase-merge', 'rebase-apply', 'CHERRY_PICK_HEAD'].some(f => fs.existsSync(path.join(gitDir, f)))) return;
 
   const asunto = git('log', '-1', '--format=%s');
@@ -68,10 +68,10 @@ function postCommit() {
     stdio: 'ignore',
   });
   git('tag', `v${nueva}`);
-  console.log(`Versión ${anterior} → ${nueva}`);
+  console.log(`Version ${anterior} → ${nueva}`);
 }
 
 const [modo, arg] = process.argv.slice(2);
 if (modo === 'commit-msg') commitMsg(arg);
 else if (modo === 'post-commit') postCommit();
-else { console.error('Uso: version.js commit-msg <fichero> | post-commit'); process.exit(2); }
+else { console.error('Usage: version.js commit-msg <file> | post-commit'); process.exit(2); }
